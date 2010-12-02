@@ -14,9 +14,9 @@ Cannabis::Cans.
       include Cannabis::Cans
     end
 
-This means that an instance of a user automatically gets can methods
-for the default REST actions: can_view?(resource),
-can_create?(resource), can_update?(resource), can_destroy?(resource).
+This means that an instance of a user automatically gets can method
+for the default REST actions: can?(:view, resource), can?(:create,
+resource), can?(:update, resource), can?(:destroy, resource).
 
 == Ables
 
@@ -59,20 +59,20 @@ Lets look at some sample code now:
     steve = User.create(:name =. 'Steve')
 
     ruby = Article.new(:title => 'Ruby')
-    john.can_create?(ruby) # true
-    steve.can_create?(ruby) # true
+    john.can?(:create, ruby) # true
+    steve.can?(:create, ruby) # true
 
     ruby.creator = john
     ruby.save
 
-    john.can_view?(ruby) # true
-    steve.can_view?(ruby) # true
+    john.can?(:view, ruby) # true
+    steve.can?(:view, ruby) # true
 
-    john.can_update?(ruby) # true
-    steve.can_update?(ruby) # false
+    john.can?(:update, ruby) # true
+    steve.can?(:update, ruby) # false
 
-    john.can_destroy?(ruby) # true
-    steve.can_destroy?(ruby) # false
+    john.can?(:destroy, ruby) # true
+    steve.can?(:destroy, ruby) # false
 
 Now we can implement our permissions for each resource and then always
 check whether a user can or cannot do something. This makes it all
@@ -92,14 +92,15 @@ each Cannabis action:
     class ApplicationController
       include Cannabis::Enforcers
 
-      delegate :can_view?, :to => :current_user
-      helper_method :can_view? # so you can use it in your views
-      hide_action :can_view?
+      delegate :can?, :to => :current_user
+      helper_method :can? # so you can use it in your views
+      hide_action :can?
 
       private
-        def enforce_view_permission(resource)
-          raise Cannabis::Transgression unless can_view?(resource)
-        end
+
+      def authorize!(action, resource)
+        raise Cannabis::Exceptions::Transgression unless can?(action, resource)
+      end
     end
 
 Which means you can use it like this:
@@ -107,13 +108,13 @@ Which means you can use it like this:
     class ArticlesController < ApplicationController
       def show
         @article = Article.find!(params[:id])
-        enforce_view_permission(@article)
+        authorize!(:view, @article)
       end
     end
 
-If the user can_view? the article, all is well. If not, a
-Cannabis::Transgression is raised which you can decide how to handle
-(show 404, slap them on the wrist, etc.).
+If the user can? :view the article, all is well. If not, a
+Cannabis::Exceptions::Transgression is raised which you can decide how
+to handle (show 404, slap them on the wrist, etc.).
 
 == Adding Your Own Actions
 
@@ -121,7 +122,7 @@ You can add your own actions like this:
 
     Cannabis.add(:publish, :publishable)
 
-The first parameter is the can method (ie: can_publish?) and the
+The first parameter is the can method (ie: can? :publish) and the
 second is the able method (ie: publishable_by?).
 
 == Review
