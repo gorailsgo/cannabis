@@ -14,10 +14,6 @@ module Cannabis
     @actions
   end
 
-  def self.cans
-    actions.keys
-  end
-
   # Adds an action to actions and the correct methods to can and able modules.
   #
   #   @param [Symbol] can?(method) The name of the can?([action]) method.

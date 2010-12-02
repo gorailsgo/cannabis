@@ -21,9 +21,4 @@ class CannabisTest < MiniTest::Unit::TestCase
     Cannabis.add(:publish, :publishable)
     assert_equal :publishable, Cannabis.actions[:publish]
   end
-
-  def test_know_cans
-    Cannabis.add(:publish, :publishable)
-    assert_equal %w(create destroy publish update view), Cannabis.cans.map(&:to_s).sort
-  end
 end

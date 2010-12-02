@@ -3,7 +3,7 @@ require "test_helper"
 class AblesTest < MiniTest::Unit::TestCase
   def setup
     @resource = Resource.new
-    @user     = MiniTest::Mock.new
+    @user = MiniTest::Mock.new
   end
 
   def test_default_viewable_by_to_true
